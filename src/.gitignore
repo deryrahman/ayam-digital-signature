@@ -1,0 +1,6 @@
+*.pyc
+*.py[cod]
+*$py.class
+__pycache__/
+credentials.json
+token.pickle

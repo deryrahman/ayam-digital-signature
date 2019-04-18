@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
+  <style type="text/css">
+
+    h3, h4 {
+      margin: auto;      
+    }
+
+    .tengah {
+      margin: 10px 20px;
+    }
+
+    .container {
+      margin-top: 30px;
+    }
+    .card {
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      transition: 0.3s;
+      border-radius: 5px;
+      background-color: white;
+      height: 80px;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+
+    .aa a {
+      text-decoration: none;
+      color: black;
+    }
+
+    .aa a:hover, .aa a:visited, .aa a:link, .aa a:active
+    {
+      color: black;
+      text-decoration: none;
+    }
+
+    #genkey {
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    }
+
+    #genkey:hover {
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Chimail</h1>
+    <div class="row align-items-center aa">
+      <a href="/inbox" class="card tengah col-lg-12">
+        <h3>Inbox</h3>
+      </a>
+      <a href="/sentmail" class="card tengah col-lg-12">
+        <h3>Sent mail</h3>
+      </a>
+      <button id="genkey" class="btn btn-info tengah">
+        <h4>- Generate Keys -</h4>
+      </button>
+    </div>
+    <div class="row tengah">
+      <br /><div id="loading" class="subtitle">Loading...</div>
+      <br /><div id="error" class="error">Error</div>
+      <div id="success">
+        <a id="download_pub" download">Public Key (Key.pub)</a>
+        <br /><a id="download_pri" download">Private Key (Key.pri)</a>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+  
+  $("#loading").hide();
+  $("#error").hide();
+  $("#success").hide();
+
+  $('#genkey').click(function() {
+      $.ajax({
+        url: '/genkey',
+        type: 'POST',
+        data: '',
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $("#loading").show();
+          $("#error").hide();
+          $("#success").hide();
+          $("#genkey").prop('disabled', true);
+        },
+        success: function(response) {
+          console.log(response);
+          $("#genkey").prop('disabled', false);
+          $("#loading").hide();
+
+          if (JSON.parse(response).error) {
+            $("#error").show();
+            $("#error").html('<b>Error:</b> ' + JSON.parse(response).data);
+            $("#success").hide();  
+          } else {
+            $("#error").hide();
+            $("#success").show();
+            $('#download_pub').attr('href', JSON.parse(response).pubKey);
+            $('#download_pri').attr('href', JSON.parse(response).priKey);
+          }
+        },
+        error: function(error) {
+          $("#genkey").prop('disabled', false);
+          $("#error").show();
+          $("#success").hide();
+          $("#loading").hide();
+        }
+      });
+    });
+</script>
+</html> 
