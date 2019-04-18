@@ -118,12 +118,3 @@ def createMessageWithAttachment(sender, to, subject, message_text, file_dir, fil
     message.attach(msg)
 
     return {'raw': base64.urlsafe_b64encode(message.as_string())}
-
-# service = getService()
-# pp(getProfile(service))
-# message = createMessage(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API', 'Halo, ini adalah test Gmail API')
-# message = createMessageWithAttachment(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
-# message = createMessageWithAttachment('fahrurrozi31@gmail.com', 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
-# pp(message)
-# pp(sendEmail(service, message))
-# pp(getInbox(service))
