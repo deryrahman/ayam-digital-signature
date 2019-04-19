@@ -17,6 +17,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 from pprint import pprint as pp
+from base64 import urlsafe_b64decode as bd
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly', 'https://www.googleapis.com/auth/gmail.send']
 
@@ -66,7 +67,29 @@ def getInbox(service, userId='me'):
     return res
 
 def getDetailInbox(service, msgId, userId='me'):
-    msg = service.users().messages().get(userId=userId, id=msgId).execute()
+    res = service.users().messages().get(userId=userId, id=msgId).execute()
+    msg = {}
+
+    res = res['payload']
+    for m in res['headers']:
+        msg[m['name']] = m['value']
+
+    # process timestamp
+    et = mktime_tz(parsedate_tz(msg[u'Date']))
+    et = datetime.datetime.fromtimestamp(et)
+    msg[u'Date'] = et.strftime('%a, %d %b %Y %I:%M %p')
+
+    # process body
+    for m in res['parts']:
+        if m['mimeType'] == 'text/html':
+            msg[u'body'] = (bd(str(m['body']['data']))).decode('utf-8')
+
+    # process from
+    msg[u'From'] = msg[u'From'].split(' ')
+    if len(msg[u'From']) > 1:
+        msg[u'FromName'] = ' '.join(msg[u'From'][:-1])
+        msg[u'FromEmail'] = msg[u'From'][-1]
+
     return msg
 
 def sendEmail(service, message, userId='me'):
@@ -118,3 +141,12 @@ def createMessageWithAttachment(sender, to, subject, message_text, file_dir, fil
     message.attach(msg)
 
     return {'raw': base64.urlsafe_b64encode(message.as_string())}
+
+# service = getService()
+# pp(getProfile(service))
+# message = createMessage(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API', 'Halo, ini adalah test Gmail API')
+# message = createMessageWithAttachment(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
+# message = createMessageWithAttachment('fahrurrozi31@gmail.com', 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
+# pp(message)
+# pp(sendEmail(service, message))
+# pp(getDetailInbox('service', '16a2f300da19b1f5'))

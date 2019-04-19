@@ -37,5 +37,10 @@ def inboxGET():
     inboxes = getInbox(service)
     return render_template('inbox.html', inboxes=inboxes)
 
+@app.route("/inbox/<msgId>", methods=['GET'])
+def detailInboxGET(msgId):
+    inbox = getDetailInbox(service, msgId)
+    return render_template('message.html', inbox=inbox)
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=1111, debug=True)

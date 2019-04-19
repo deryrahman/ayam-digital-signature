@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
+  <style type="text/css">
+
+    body {
+      line-height: 1.15;
+    }
+
+    h3 {
+      margin: auto;
+      padding-bottom: 12px;
+    }
+
+    .tengah {
+      padding: 0;
+      margin: 1px 5px;
+    }
+
+    .container {
+      margin-top: 20px;
+    }
+
+    .card {
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      transition: 0.3s;
+      border-radius: 5px;
+      background-color: white;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+
+    .box {
+      padding: 5px 10px;
+    }
+
+    .from-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .from-email {
+      margin-top: 2px;
+      margin-bottom: 8px;
+    }
+
+    .small-gray {
+      font-size: 12px;
+      color: gray;
+    }
+
+    .body {
+      padding: 30px 0 50px;
+    }
+
+    .to-me {
+      font-size: 14px;
+      color: gray;
+    }
+
+    .reply {
+      padding: 8px 40px;
+      color: rgb(80, 80, 80);
+    }
+
+    .btn-um {
+      background-color: white;
+      border: 1px solid gray;
+      margin-right: 0px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>{{ inbox.Subject }}</h3>
+    <div class="row">
+      <div class="tengah col-lg-12">
+        <div class="box">
+          <div class="box-header">
+            <div class="from-name">{{ inbox.FromName }}<span class="to-me"> to me</span></div>
+            <div class="from-email small-gray">{{ inbox.FromEmail }}</div>
+          </div>
+          <div class="small-gray">{{ inbox.Date }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="row body">
+      <div class="tengah col-lg-12">
+        <div class="box">
+          {{ inbox.body | safe }}
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom: 20px;">
+      <div class="box">
+        <button class="btn tengah btn-um" onclick="goBack()">
+          <div class="reply">&#x21A9;&nbsp; Back</div>
+        </button>
+        <button class="btn tengah btn-um" onclick="goCreate()">
+          <div class="reply">Reply &nbsp;&#x21AA;</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript">
+  function goBack() {
+    window.history.back();
+  }
+  function goCreate() {
+    window.location.href = "/sentmail"
+  }
+</script>
+</html> 
