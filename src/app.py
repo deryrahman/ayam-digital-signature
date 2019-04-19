@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from gmail_api import *
+# from gmail_api import *
 from ecceg import ECCEG
 import time
 import os, json
@@ -10,7 +10,7 @@ app.config['ROOT_PATH'] = app.root_path
 
 output_path = '/static/output/'
 ecceg_ = ECCEG()
-service = getService()
+# service = getService()
 
 @app.route("/")
 def main():
@@ -41,6 +41,14 @@ def inboxGET():
 def detailInboxGET(msgId):
     inbox = getDetailInbox(service, msgId)
     return render_template('message.html', inbox=inbox)
+
+@app.route("/send-email", methods=['GET'])
+def sendEmailGET():
+    return render_template('send.html')
+
+@app.route("/send-email", methods=['POST'])
+def sendEmailPOST():
+    return render_template('send.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=1111, debug=True)
