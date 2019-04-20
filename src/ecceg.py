@@ -93,7 +93,7 @@ class ECCEG:
     private_key = randint(1, self.p - 1)
     public_key = self.multiply_with_point(private_key, self.base_point)
 
-    return private_key, public_key
+    return public_key, private_key
 
   def encode(self, b):
     for i in range(1, self.k_koblitz):
@@ -130,7 +130,7 @@ class ECCEG:
       cipher += str(char_as_cip[1][0]) + ' '
       cipher += str(char_as_cip[1][1]) + ' '
 
-    print cipher
+    # print cipher
 
     # remove last space
     cipher = cipher[:-1]
