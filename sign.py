@@ -1,2 +1,5 @@
+MARK_START = b"<petok>"
+
+
 def sign(data):
-    pass
+    return MARK_START
