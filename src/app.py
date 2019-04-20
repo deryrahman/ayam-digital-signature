@@ -1,16 +1,20 @@
 from flask import Flask, render_template, request
-# from gmail_api import *
-from ecceg import ECCEG
+
+import re
 import time
 import os, json
-from random import randint
+from sha import SHA1
+from gmail_api import *
+from ecceg import ECCEG
+from chill import Chill
+from base64 import b64encode, b64decode
 
 app = Flask(__name__)
 app.config['ROOT_PATH'] = app.root_path
 
 output_path = '/static/output/'
 ecceg_ = ECCEG()
-# service = getService()
+service = getService()
 
 @app.route("/")
 def main():
@@ -25,7 +29,7 @@ def eccegGenKey():
         json.dump({'public_key': pubKey}, jf)
     with open(filepath + 'kunci.pri', 'w') as jf:
         json.dump({'private_key': privKey}, jf)
-    
+
     return json.dumps({
         'error': False,
         'pubKey': output_path + 'kunci.pub?' + str(time.time()),
@@ -48,7 +52,174 @@ def sendEmailGET():
 
 @app.route("/send-email", methods=['POST'])
 def sendEmailPOST():
-    return render_template('send.html')
+
+    femail = request.form.get('femail')
+    fsubject = request.form.get('fsubject')
+    fbody = request.form.get('fbody')
+    fkey = request.form.get('fkey')
+    fattach, fsign = None, None
+
+    if 'fattach' in request.files:
+        fattach = request.files['fattach']
+    if 'fsign' in request.files:
+        fsign = request.files['fsign']
+
+    filepath = app.root_path + output_path
+    ret = {}
+
+    if femail and fsubject and fbody:
+        if fkey: # encrypt dulu
+            ch = Chill(plain_text=fbody,
+                       key=fkey,
+                       mode='CBC',
+                       cipher_text_path=filepath+'cipher.txt')
+            ch.encrypt()
+            fbody = b64encode(ch.cipher_text)
+        if fsign: # sign dulu
+
+            # hash dulu terus encrypt
+            sha1 = SHA1()
+            hs = sha1.do_hash(fbody.encode())
+
+            # save and load private key
+            fsign.save(filepath + 'kunci.pri')
+            with open(filepath + 'kunci.pri', 'r') as f:
+                fsign = json.load(f)
+
+            priK = fsign['private_key']
+            fsign = (priK[0], priK[1])
+            sign, _ = ecceg_.encrypt(fsign, hs)
+
+            ds = '\n<ayam>'+b64encode(sign)+'</ayam>'
+            fbody += ds
+
+        # femailfrom = getProfile(service)['emailAddress']
+        if fattach: # createWithAttach
+            # save and load attachfile
+            filename = fattach.filename
+            fattach.save(filepath + filename)
+
+            print 'Sending with Attach'
+            print '---'
+            print 'From:', 'fahrurrozi31@gmail.com'
+            print 'To:', femail
+            print 'Subject:', fsubject
+            print '---'
+            print fbody
+            print '---'
+            print 'Attachment', filepath + filename
+            # sent = createMessageWithAttachment(femailfrom, femail, fsubject, fbody, filepath, filename)
+        else: # biasa
+            print 'Sending without Attach'
+            print '---'
+            print 'From:', 'fahrurrozi31@gmail.com'
+            print 'To:', femail
+            print 'Subject:', fsubject
+            print '---'
+            print fbody
+            print '---'
+            # sent = createMessage(femailfrom, femail, fsubject, fbody)
+        ret['error'] = False
+        ret['message'] = "Success"
+    else:
+        ret['error'] = True
+        ret['message'] = "Make sure email destination or subject or body not empty!"
+        # error
+    return render_template('send.html', ret=ret)
+
+def isBase64(s):
+    try:
+        return b64encode(b64decode(s)) == s
+    except Exception:
+        return False
+
+@app.route("/inbox/decrypt", methods=['POST'])
+def decryptMessage():
+
+    fkey = request.form.get('fkey')
+    fbody = (request.form.get('fbody')).strip()
+    print fkey
+    print fbody
+
+    if not fkey:
+        return json.dumps({
+            'error': True,
+            'error_message': 'Key not found',
+        })
+
+    # check if hash exists
+    res = re.search("<ayam>(.*)</ayam>", fbody)
+    # fbody displit jadi fmsg dan fhash if hash exists
+    fmsg = fbody.split(res.group(0))[0][:-1] if res else fbody
+
+    # cek if fmsg is b64encoded
+    if not isBase64(fmsg):
+        return json.dumps({
+            'error': True,
+            'error_message': 'Message isn\'t encrypted',
+        })
+
+    ch = Chill(plain_text='dummy', key=fkey, mode='CBC')
+    ch.cipher_text = b64decode(fmsg)
+    ch.decrypt()
+    
+    return json.dumps({
+        'error': False,
+        'plaintext': ch.plain_text,
+    })
+
+@app.route("/inbox/verify", methods=['POST'])
+def verifySignature():
+    
+    fbody = (request.form.get('fbody')).strip()
+    if 'fsign' in request.files:
+        fsign = request.files['fsign']
+    else:
+        return json.dumps({
+            'error': True,
+            'correct': False,
+            'error_message': 'Public key not found'
+        })
+    
+    # check if hash exists
+    res = re.search("<ayam>(.*)</ayam>", fbody)
+    if res:
+        # fbody displit jadi fmsg dan fhash
+        fmsg = fbody.split(res.group(0))[0]
+        fhash = res.group(1);
+    else:
+        return json.dumps({
+            'error': True,
+            'correct': False,
+            'error_message': 'Signature not found'
+        })
+
+    sha1 = SHA1()
+    fmsg_hash = sha1.do_hash(fmsg.encode())
+
+    # save and load public key
+    filepath = app.root_path + output_path
+    fsign.save(filepath + 'kunci.pub')
+    with open(filepath + 'kunci.pub', 'r') as f:
+        fsign = json.load(f)
+
+    pubK = fsign['public_key']
+    try:
+        sign, _ = ecceg_.decrypt(pubK, b64decode(fhash))
+    except Exception as e:
+        return json.dumps({
+            'error': True,
+            'correct': False,
+            'error_message': 'Decrypt error, check your public key'
+        })
+
+    print fmsg_hash
+    print sign
+
+    return json.dumps({
+        'error': False,
+        'correct': (fmsg_hash == sign),
+    })
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=1111, debug=True)
