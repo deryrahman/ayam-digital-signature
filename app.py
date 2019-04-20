@@ -189,7 +189,7 @@ def verifySignature():
     res = re.search(MARK_START+"(.*)"+MARK_END, fbody)
     if res:
         # fbody displit jadi fmsg dan fhash
-        fmsg = fbody.split(res.group(0))[0]
+        fmsg = (fbody.split(res.group(0))[0]).strip()
         fhash = res.group(1);
     else:
         return json.dumps({
