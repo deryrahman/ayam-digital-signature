@@ -12,6 +12,9 @@ from base64 import b64encode, b64decode
 app = Flask(__name__)
 app.config['ROOT_PATH'] = app.root_path
 
+MARK_START = "---ayamayam---"
+MARK_END = "---tokpetok---"
+
 output_path = '/static/output/'
 ecceg_ = ECCEG()
 service = getService()
@@ -90,7 +93,7 @@ def sendEmailPOST():
             fsign = (priK[0], priK[1])
             sign, _ = ecceg_.encrypt(fsign, hs)
 
-            ds = '\n<ayam>'+b64encode(sign)+'</ayam>'
+            ds = '\n'+MARK_START+b64encode(sign)+MARK_END
             fbody += ds
 
         if fattach: # createWithAttach
@@ -149,7 +152,7 @@ def decryptMessage():
         })
 
     # check if hash exists
-    res = re.search("<ayam>(.*)</ayam>", fbody)
+    res = re.search(MARK_START+"(.*)"+MARK_END, fbody)
     # fbody displit jadi fmsg dan fhash if hash exists
     fmsg = fbody.split(res.group(0))[0][:-1] if res else fbody
 
@@ -183,7 +186,7 @@ def verifySignature():
         })
     
     # check if hash exists
-    res = re.search("<ayam>(.*)</ayam>", fbody)
+    res = re.search(MARK_START+"(.*)"+MARK_END, fbody)
     if res:
         # fbody displit jadi fmsg dan fhash
         fmsg = fbody.split(res.group(0))[0]
