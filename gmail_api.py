@@ -88,8 +88,9 @@ def getDetailInbox(service, msgId, userId='me'):
     if len(msg[u'From']) > 1:
         msg[u'FromName'] = ' '.join(msg[u'From'][:-1])
         msg[u'FromEmail'] = msg[u'From'][-1]
-    msg[u'FromName'] = msg[u'From'][0]
-    msg[u'FromEmail'] = msg[u'From'][0]
+    else:
+        msg[u'FromName'] = msg[u'From'][0]
+        msg[u'FromEmail'] = msg[u'From'][0]
 
     return msg
 
