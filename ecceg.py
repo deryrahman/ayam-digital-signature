@@ -130,7 +130,7 @@ class ECCEG:
       cipher += str(char_as_cip[1][0]) + ' '
       cipher += str(char_as_cip[1][1]) + ' '
 
-    print cipher
+    print(cipher)
 
     # remove last space
     cipher = cipher[:-1]
