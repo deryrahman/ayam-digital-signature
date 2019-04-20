@@ -118,6 +118,7 @@
     }
 
     .upload {
+      cursor: pointer;
       margin: 0;
       transition: 0.3s;
       height: 38px;
@@ -136,32 +137,37 @@
       display: none;
     }
 
+    .opt {
+      font-size: 16px;
+      color: gray;
+    }
+
   </style>
 </head>
 <body>
 
   <div class="container">
     <h3>New Message</h3>
-    <form>
+    <form method="POST" enctype="multipart/form-data">
       <div class="row">
         <div class="col-sm-12">
           <div class="input-group mb-2">
             <div class="input-group-prepend">
               <div class="input-group-text">To</div>
             </div>
-            <input type="email" class="form-control" id="femail" placeholder="mail@ex.com" required autofocus>
+            <input type="email" class="form-control" id="femail" placeholder="mail@ex.com" name="femail" required autofocus>
           </div>
         </div>
       </div>
       <div class="form-group row">
         <div class="col-sm-12">
-          <input type="text" class="form-control" id="fsubject" placeholder="Subject" required>
+          <input type="text" class="form-control" id="fsubject" placeholder="Subject" name="fsubject" required>
         </div>
       </div>
 
       <div class="form-group row">
         <div class="col-sm-12">
-          <textarea class="form-control" id="fbody" rows="3" required placeholder="Hi!"></textarea>
+          <textarea class="form-control" id="fbody" rows="3" name="fbody" required placeholder="Hi!"></textarea>
         </div>
       </div>
 
@@ -175,7 +181,7 @@
         </div>
         <div class="col-8">
           <div class="collapse" id="encrypt">
-            <input type="text" class="form-control" placeholder="Key" id="encryptKey">
+            <input type="text" class="form-control" placeholder="Key" id="encryptKey" name="fkey">
           </div>
         </div>
       </div>
@@ -188,7 +194,7 @@
         </div>
         <div class="col-9">
           <div class="collapse" id="sign">
-            <input id="signKey" type="file" accept=".pri" name="file">
+            <input id="signKey" type="file" accept=".pri" name="fsign">
             <label class="card upload" for="signKey" id="signKey-label">
               Select private key
             </label>
@@ -196,12 +202,12 @@
         </div>
       </div>
 
-      <h5>Attachment</h5>
+      <h5>Attachment<span class="opt"> (optional)</span></h5>
 
       <div class="form-group row">
         <div class="col-sm-12">
           <div class="custom-file">
-            <input type="file" class="custom-file-input" id="ffile">
+            <input type="file" class="custom-file-input" id="ffile" name="fattach">
             <label class="custom-file-label" for="ffile" id="ffile-label">
                Attach a file..
             </label>
@@ -276,22 +282,6 @@
     });
     $("#signKey").prop('required', sign);
   });
-
-  var loadFile = function(event) {
-    // document.getElementById('outputbef').classList.remove("hidden");
-
-    // var file = event.target.files[0];
-    // var name = document.getElementById('name');
-    // var size = document.getElementById('size');
-    // name.innerHTML = file.name;
-    // size.innerHTML = file.size + ' bytes';
-
-    // document.getElementById('enkripsi').classList.remove("hidden");
-    // document.getElementById('method').classList.remove("hidden");
-    // document.getElementById('kunci').classList.remove("hidden");
-    // document.getElementById('submit').classList.remove("hidden");
-    // document.getElementById('msg').classList.remove("hidden");
-  };
 
 </script>
 </html> 

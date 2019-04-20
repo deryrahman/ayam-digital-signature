@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <head>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
   <style type="text/css">
@@ -23,6 +24,7 @@
 
     .container {
       margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     .card {
@@ -65,15 +67,62 @@
       color: gray;
     }
 
-    .reply {
-      padding: 8px 40px;
-      color: rgb(80, 80, 80);
+    .ummm {
+      padding: 8px 18px;
     }
 
     .btn-um {
       background-color: white;
       border: 1px solid gray;
       margin-right: 0px;
+    }
+
+    .btn-um:focus {
+      border-color: #111;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 2px rgba(17, 17, 17, 0.6);
+    }
+
+    #fbody {
+      word-break: break-word;
+    }
+
+    .form-control:focus {
+      border-color: #111;
+      box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 2px rgba(17, 17, 17, 0.6);
+    }
+
+    .send {
+      margin-top: 16px;
+      padding: 6px 14px;
+      width: 100%;
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    }
+
+    .card {
+      border-radius: 3px;
+      background-color: white;
+      text-align: -webkit-center;
+      border: 0;
+    }
+
+    .upload {
+      cursor: pointer;
+      margin: 0;
+      transition: 0.3s;
+      height: 38px;
+      padding: 9px;
+      background-color: white;
+      color: rgb(80, 80, 80);
+      border: 1px solid #ced4da;
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.2);
+    }
+
+    .card:hover {
+      box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    }
+
+    input[type="file"], .hidden {
+      display: none;
     }
 
   </style>
@@ -94,30 +143,155 @@
     </div>
     <div class="row body">
       <div class="tengah col-lg-12">
-        <div class="box">
+        <div class="box" id="fbody">
           {{ inbox.body | safe }}
         </div>
       </div>
     </div>
-    <div class="row" style="margin-bottom: 20px;">
+    <div class="row">
       <div class="box">
-        <button class="btn tengah btn-um" onclick="goBack()">
-          <div class="reply">&#x21A9;&nbsp; Back</div>
+        <button class="btn tengah btn-um" id="decryptButton" type="button" data-toggle="collapse" data-target="#decrypt" aria-expanded="false" aria-controls="decrypt">
+          <div class="ummm" id="decryptText">Decrypt</div>
         </button>
-        <button class="btn tengah btn-um" onclick="goCreate()">
-          <div class="reply">Reply &nbsp;&#x21AA;</div>
+        <button class="btn tengah btn-um" id="verifyButton" type="button" data-toggle="collapse" data-target="#verify" aria-expanded="false" aria-controls="verify">
+          <div class="ummm" id="verifyText">Verify</div>
         </button>
       </div>
     </div>
+    <form>
+      <div class="collapse" id="decrypt">
+        <input type="text" id="decryptKey" class="form-control" placeholder="Key" name="fkey">
+        <button id="decryptSubmit" onclick="decrypt()" class="btn btn-um send">Decrypt Message</button>
+      </div>
+      <div class="collapse" id="verify">
+        <input id="verifyKey" type="file" accept=".pub" name="fsign">
+        <label class="card upload" for="verifyKey" id="verifyKey-label">
+          Select public key
+        </label>
+        <button id="verifySubmit" onclick="verify()" class="btn btn-um send">Verify Signature</button>
+      </div>
+    </form>
   </div>
 </body>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript">
-  function goBack() {
-    window.history.back();
+
+  // update verifyKey filename
+  $('#verifyKey').change(function(e){
+    var filename = e.target.files[0].name;
+    if (filename.length > 20){
+      filename = '...' + filename.substring(filename.length - 20, filename.length);
+    }
+    $('#verifyKey-label').html(filename);
+  });
+
+  $('#decrypt').on('hide.bs.collapse', function () {
+    $('#decryptButton').css({
+      'background-color': 'white',
+      'color': 'black'
+    });
+    $("#decryptKey").prop('required', 0);
+  })
+
+  $('#decrypt').on('show.bs.collapse', function () {
+    $("#verify").collapse('hide');
+    $('#decryptButton').css({
+      'background-color': '#1e88e5',
+      'color': 'white'
+    });
+    $("#decryptKey").prop('required', 1);
+  })
+
+  $('#verify').on('hide.bs.collapse', function () {
+    $('#verifyButton').css({
+      'background-color': 'white',
+      'color': 'black'
+    });
+    $("#verifyKey").prop('required', 0);
+  })
+
+  $('#verify').on('show.bs.collapse', function () {
+    $("#decrypt").collapse('hide');
+    $('#verifyButton').css({
+      'background-color': '#1e88e5',
+      'color': 'white'
+    });
+    $("#verifyKey").prop('required', 1);
+  })
+
+  function decrypt() {
+    var formData = new FormData($('form')[0]);
+    formData.append('fbody', $("#fbody").text());
+    $.ajax({
+        url: '/inbox/decrypt',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $("#decryptSubmit").prop('disabled', true);
+        },
+        success: function(response) {
+          console.log(response);
+          $("#decryptSubmit").prop('disabled', false);
+
+          if (JSON.parse(response).error) {
+            alert(JSON.parse(response).error_message);
+          } else {
+            if (JSON.parse(response).plaintext == '') {
+              alert('decrypt failed, check your key');
+            } else {
+              $("#fbody").text(JSON.parse(response).plaintext);
+              $("#decrypt").collapse('hide');
+              $('#decryptButton').css({
+                'background-color': '#12ff51',
+                'color': 'white'
+              });
+              $("#decryptButton").prop('disabled', true);
+              $("#decryptText").text('Decrypted');
+            }
+          }
+        },
+        error: function(error) {
+          $("#decryptSubmit").prop('disabled', false);
+          console.log(error);
+          alert('decrypt failed, check your key');
+        }
+      });
   }
-  function goCreate() {
-    window.location.href = "/send-email"
+  function verify() {
+    var formData = new FormData($('form')[0]);
+    formData.append('fbody', $("#fbody").text());
+    $.ajax({
+        url: '/inbox/verify',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        beforeSend: function() {
+          $("#verifySubmit").prop('disabled', true);
+        },
+        success: function(response) {
+          console.log(response);
+          $("#verifySubmit").prop('disabled', false);
+
+          if (JSON.parse(response).error) {
+            alert(JSON.parse(response).error_message);
+          } else {
+            if (JSON.parse(response).correct) {
+              $("#verify").collapse('hide');
+              $('#verifyButton').css({
+                'background-color': '#12ff51',
+                'color': 'white'
+              });
+              $("#verifyButton").prop('disabled', true);
+              $("#verifyText").text('verified');
+            } else {
+              alert('Signature not valid!');
+            }
+          }
+        }
+      });
   }
+
 </script>
 </html> 
