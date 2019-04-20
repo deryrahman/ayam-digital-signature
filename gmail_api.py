@@ -76,13 +76,21 @@ def getDetailInbox(service, msgId, userId='me'):
     msg[u'Date'] = et.strftime('%a, %d %b %Y %I:%M %p')
 
     # process body
+    msg['Attachments'] = []
     if 'parts' in res:
         for m in res['parts']:
-            if m['mimeType'] == 'text/html':
-                msg[u'body'] = (bd(str(m['body']['data']))).decode('utf-8')
+            if m['filename']:
+                getAttachments(service, 'me', msgId, m['body']['attachmentId'], m['filename'])
+                msg['Attachments'].append(m['filename'])
+            else:
+                if m['mimeType'] == 'text/plain' or m['mimeType'] == 'text/html':
+                    msg[u'body'] = (bd(str(m['body']['data']))).decode('utf-8')
+                if m['mimeType'] == 'multipart/alternative':
+                    for n in m['parts']:
+                        if n['mimeType'] == 'text/plain' or n['mimeType'] == 'text/html':
+                            msg[u'body'] = (bd(str(n['body']['data']))).decode('utf-8')
     else:
         msg[u'body'] = (bd(str(res['body']['data']))).decode('utf-8')
-
     # process from
     msg[u'From'] = msg[u'From'].split(' ')
     if len(msg[u'From']) > 1:
@@ -91,7 +99,6 @@ def getDetailInbox(service, msgId, userId='me'):
     else:
         msg[u'FromName'] = msg[u'From'][0]
         msg[u'FromEmail'] = msg[u'From'][0]
-
     return msg
 
 def sendEmail(service, message, userId='me'):
@@ -142,11 +149,11 @@ def createMessageWithAttachment(to, subject, message_text, file_dir, filename):
 
     return {'raw': base64.urlsafe_b64encode(message.as_string()).decode()}
 
-# service = getService()
-# pp(getProfile(service))
-# message = createMessage(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API', 'Halo, ini adalah test Gmail API')
-# message = createMessageWithAttachment(getProfile(service)['emailAddress'], 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
-# message = createMessageWithAttachment('fahrurrozi31@gmail.com', 'komunitascyberitb@gmail.com', 'Test API With Attachment', 'Halo, ini adalah test Gmail API', 'static/icon', 'mp3.png')
-# pp(message)
-# pp(sendEmail(service, message))
-# pp(getDetailInbox('service', '16a2f300da19b1f5'))
+def getAttachments(service, user_id, msg_id, id_, filename):
+    message = service.users().messages().attachments().get(userId=user_id, messageId=msg_id, id=id_).execute()
+    if 'data' in message:
+        file_data = bd(message['data'].encode('UTF-8'))
+        path = ''.join(['static/output/', filename])
+        f = open(path, 'w')
+        f.write(file_data)
+        f.close()
