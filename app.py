@@ -93,7 +93,6 @@ def sendEmailPOST():
             ds = '\n<ayam>'+b64encode(sign)+'</ayam>'
             fbody += ds
 
-        # femailfrom = getProfile(service)['emailAddress']
         if fattach: # createWithAttach
             # save and load attachfile
             filename = fattach.filename
@@ -108,7 +107,7 @@ def sendEmailPOST():
             print fbody
             print '---'
             print 'Attachment', filepath + filename
-            # sent = createMessageWithAttachment(femailfrom, femail, fsubject, fbody, filepath, filename)
+            msg = createMessageWithAttachment(femail, fsubject, fbody, filepath, filename)
         else: # biasa
             print 'Sending without Attach'
             print '---'
@@ -118,13 +117,15 @@ def sendEmailPOST():
             print '---'
             print fbody
             print '---'
-            # sent = createMessage(femailfrom, femail, fsubject, fbody)
+            msg = createMessage(femail, fsubject, fbody)
+        res = sendEmail(service, msg)
+        print res
         ret['error'] = False
         ret['message'] = "Success"
     else:
+        # error
         ret['error'] = True
         ret['message'] = "Make sure email destination or subject or body not empty!"
-        # error
     return render_template('send.html', ret=ret)
 
 def isBase64(s):

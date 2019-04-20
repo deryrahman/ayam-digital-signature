@@ -39,10 +39,6 @@ def getService():
     s = build('gmail', 'v1', credentials=creds)
     return s
 
-def getProfile(service, userId='me'):
-    profile = service.users().getProfile(userId=userId).execute()
-    return profile
-
 def getInbox(service, userId='me'):
     msgList = service.users().messages().list(userId=userId, labelIds='INBOX', maxResults=10).execute()
     messages = msgList.get('messages', [])
@@ -80,15 +76,20 @@ def getDetailInbox(service, msgId, userId='me'):
     msg[u'Date'] = et.strftime('%a, %d %b %Y %I:%M %p')
 
     # process body
-    for m in res['parts']:
-        if m['mimeType'] == 'text/html':
-            msg[u'body'] = (bd(str(m['body']['data']))).decode('utf-8')
+    if 'parts' in res:
+        for m in res['parts']:
+            if m['mimeType'] == 'text/html':
+                msg[u'body'] = (bd(str(m['body']['data']))).decode('utf-8')
+    else:
+        msg[u'body'] = (bd(str(res['body']['data']))).decode('utf-8')
 
     # process from
     msg[u'From'] = msg[u'From'].split(' ')
     if len(msg[u'From']) > 1:
         msg[u'FromName'] = ' '.join(msg[u'From'][:-1])
         msg[u'FromEmail'] = msg[u'From'][-1]
+    msg[u'FromName'] = msg[u'From'][0]
+    msg[u'FromEmail'] = msg[u'From'][0]
 
     return msg
 
@@ -96,18 +97,16 @@ def sendEmail(service, message, userId='me'):
     message = service.users().messages().send(userId=userId, body=message).execute()
     return message
 
-def createMessage(sender, to, subject, message_text):
+def createMessage(to, subject, message_text):
     message = MIMEText(message_text)
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
+    message['To'] = to
+    message['Subject'] = subject
     return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
-def createMessageWithAttachment(sender, to, subject, message_text, file_dir, filename):
+def createMessageWithAttachment(to, subject, message_text, file_dir, filename):
     message = MIMEMultipart()
-    message['to'] = to
-    message['from'] = sender
-    message['subject'] = subject
+    message['To'] = to
+    message['Subject'] = subject
 
     msg = MIMEText(message_text)
     message.attach(msg)
@@ -140,7 +139,7 @@ def createMessageWithAttachment(sender, to, subject, message_text, file_dir, fil
     msg.add_header('Content-Disposition', 'attachment', filename=filename)
     message.attach(msg)
 
-    return {'raw': base64.urlsafe_b64encode(message.as_string())}
+    return {'raw': base64.urlsafe_b64encode(message.as_string()).decode()}
 
 # service = getService()
 # pp(getProfile(service))
