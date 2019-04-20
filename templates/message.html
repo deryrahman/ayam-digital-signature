@@ -240,14 +240,14 @@
             if (JSON.parse(response).plaintext == '') {
               alert('decrypt failed, check your key');
             } else {
-              $("#fbody").text(JSON.parse(response).plaintext);
+              $("#fbody").text(JSON.parse(response).plaintext + JSON.parse(response).sign);
               $("#decrypt").collapse('hide');
               $('#decryptButton').css({
                 'background-color': '#12ff51',
                 'color': 'white'
               });
               $("#decryptButton").prop('disabled', true);
-              $("#decryptText").text('Decrypted');
+              $("#decryptText").text('decrypted');
             }
           }
         },
@@ -258,9 +258,10 @@
         }
       });
   }
+  var fbodyy = $("#fbody").text();
   function verify() {
     var formData = new FormData($('form')[0]);
-    formData.append('fbody', $("#fbody").text());
+    formData.append('fbody', fbodyy);
     $.ajax({
         url: '/inbox/verify',
         type: 'POST',

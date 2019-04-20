@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 
 import re
 import time
@@ -122,11 +122,14 @@ def sendEmailPOST():
             print '---'
             msg = createMessage(femail, fsubject, fbody)
         res = sendEmail(service, msg)
-        print res
-        ret['error'] = False
-        ret['message'] = "Success"
+        if res['id']:
+            return redirect(url_for('inboxGET'))
+        else:
+            ret['error'] = True
+        return render_template('send.html', ret=ret)
     else:
         # error
+        # TODO: improve ux
         ret['error'] = True
         ret['message'] = "Make sure email destination or subject or body not empty!"
     return render_template('send.html', ret=ret)
@@ -170,6 +173,7 @@ def decryptMessage():
     return json.dumps({
         'error': False,
         'plaintext': ch.plain_text,
+        'sign': MARK_START+res.group(1)+MARK_END if res else ''
     })
 
 @app.route("/inbox/verify", methods=['POST'])
@@ -190,7 +194,7 @@ def verifySignature():
     if res:
         # fbody displit jadi fmsg dan fhash
         fmsg = (fbody.split(res.group(0))[0]).strip()
-        fhash = res.group(1);
+        fhash = res.group(1)
     else:
         return json.dumps({
             'error': True,
