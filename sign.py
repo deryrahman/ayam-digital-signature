@@ -3,4 +3,4 @@ MARK_END = b"</petok>"
 
 
 def sign(data):
-    return MARK_START + MARK_END
+    return data + MARK_START + MARK_END

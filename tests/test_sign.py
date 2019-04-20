@@ -11,3 +11,8 @@ def test_sign_returns_bytes_containing_start_mark():
 
 def test_sign_returns_bytes_containing_end_mark():
     assert MARK_END in sign(b"test")
+
+
+def test_sign_returns_bytes_containing_data():
+    data = b"test"
+    assert data in sign(data)
