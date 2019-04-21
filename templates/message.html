@@ -319,6 +319,10 @@
               $("#verifyText").text('verified');
             } else {
               alert('Signature not valid!');
+              $('#verifyButton').css({
+                'background-color': '#e53935',
+                'color': 'white'
+              });
             }
           }
         },
