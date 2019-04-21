@@ -10,6 +10,10 @@ pylint = "*"
 
 [packages]
 flask = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
+numpy = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "2.7"
