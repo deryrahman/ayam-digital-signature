@@ -258,6 +258,10 @@
           } else {
             if (JSON.parse(response).plaintext == '') {
               alert('decrypt failed, check your key');
+              $('#decryptButton').css({
+                'background-color': '#e53935',
+                'color': 'white'
+              });
             } else {
               $("#fbody").text(JSON.parse(response).plaintext + JSON.parse(response).sign);
               $("#decrypt").collapse('hide');
@@ -296,6 +300,10 @@
 
           if (JSON.parse(response).error) {
             alert(JSON.parse(response).error_message);
+            $('#verifyButton').css({
+              'background-color': '#e53935',
+              'color': 'white'
+            });
           } else {
             if (JSON.parse(response).correct) {
               $("#verify").collapse('hide');

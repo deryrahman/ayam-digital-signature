@@ -159,6 +159,7 @@ def decryptMessage():
     # fbody displit jadi fmsg dan fhash if hash exists
     fmsg = fbody.split(res.group(0))[0][:-1] if res else fbody
 
+    fmsg = fmsg.strip()
     # cek if fmsg is b64encoded
     if not isBase64(fmsg):
         return json.dumps({
