@@ -149,6 +149,7 @@
       </div>
     </div>
     {% if 'Attachments' in inbox %}
+      {% if inbox.Attachments|length %}
       <div class="row">
         <div class="tengah col-lg-12">
           <div class="box">
@@ -164,6 +165,7 @@
           </div>
         </div>
       </div>
+      {% endif %}
     {% endif %}
     <div class="row">
       <div class="box">
