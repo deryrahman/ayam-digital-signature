@@ -278,6 +278,10 @@
           $("#decryptSubmit").prop('disabled', false);
           console.log(error);
           alert('decrypt failed, check your key');
+          $('#decryptButton').css({
+            'background-color': '#e53935',
+            'color': 'white'
+          });
         }
       });
   }
@@ -317,7 +321,17 @@
               alert('Signature not valid!');
             }
           }
+        },
+        error: function(error) {
+          $("#verifySubmit").prop('disabled', false);
+          console.log(error);
+          alert('verify failed');
+          $('#verifyButton').css({
+            'background-color': '#e53935',
+            'color': 'white'
+          });
         }
+
       });
   }
 
