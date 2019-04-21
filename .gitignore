@@ -2,6 +2,7 @@
 /token.pickle
 
 /static/output/*
+!/static/output/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
